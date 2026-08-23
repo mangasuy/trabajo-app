@@ -52,7 +52,7 @@ function b64ToUint8(base64){
  const b64=(base64+padding).replace(/-/g,'+').replace(/_/g,'/');
  const raw=atob(b64); return Uint8Array.from([...raw].map(c=>c.charCodeAt(0)));
 }
-document.getElementById('notifyBtn').onclick=async()=>{
+document.getElementById('notifyBtn').addEventListener('click', async ()=>{
  const st=document.getElementById('setupStatus');
  try{
   if(!('serviceWorker' in navigator)||!('PushManager' in window)) throw new Error('Este navegador no admite Web Push.');
@@ -66,7 +66,7 @@ document.getElementById('notifyBtn').onclick=async()=>{
   await fetch(API+'/api/push/subscribe',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(sub)});
   st.textContent='✓ Alertas activadas en este teléfono.';
  }catch(e){st.textContent='No se pudieron activar: '+e.message;}
-};
+});
 
 function esc(s){return String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
 const box=document.getElementById('jobs');
