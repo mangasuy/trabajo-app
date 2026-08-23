@@ -1,0 +1,98 @@
+<!doctype html><html lang="es"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#52697b"><link rel="manifest" href="manifest.webmanifest">
+<title>Trabajo</title>
+<style>
+:root{--bg:#f4f6f8;--card:#fff;--txt:#20272d;--muted:#77818a;--line:#e5e9ec;--accent:#52697b;--ok:#587461;--okbg:#edf4ef;--warn:#8b6d39;--warnbg:#f7f1e6}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--txt);font-family:system-ui,-apple-system,Segoe UI,sans-serif}
+main{max-width:650px;margin:auto;padding:18px 14px 94px}header{display:flex;justify-content:space-between;align-items:center;margin:5px 2px 18px}
+h1{margin:0;font-size:25px}.sub{font-size:12px;color:var(--muted);margin-top:3px}.live{background:var(--okbg);color:var(--ok);border-radius:999px;padding:8px 11px;font-size:12px;font-weight:750}
+.setup{background:#fff;border:1px solid var(--line);border-radius:20px;padding:16px;margin:0 0 15px}
+.setup h2{font-size:15px;margin:0 0 5px}.setup p{font-size:12px;color:var(--muted);line-height:1.45;margin:0 0 12px}
+.setup-actions{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+button,a{border:0;border-radius:13px;padding:12px;text-align:center;text-decoration:none;font-weight:750;font-size:12px}
+.primary{background:var(--accent);color:#fff}.secondary{background:#eef1f3;color:#4c5861}
+.alert{background:#fff;border:1px solid var(--line);border-radius:18px;padding:14px;margin-bottom:14px;display:flex;gap:12px;align-items:center}
+.alert b{font-size:13px}.alert p{font-size:11px;color:var(--muted);margin:3px 0 0}
+.tabs{display:flex;gap:8px;overflow:auto;margin:15px 0}.tab{border:1px solid var(--line);background:#fff;border-radius:999px;padding:9px 13px;white-space:nowrap;font-size:12px;color:#4d5962}
+.card{background:#fff;border:1px solid var(--line);border-radius:20px;padding:16px;margin:11px 0;box-shadow:0 4px 18px rgba(25,35,45,.035)}
+.head{display:flex;gap:12px}.score{width:58px;height:58px;flex:0 0 58px;border-radius:16px;display:grid;place-items:center;font-size:18px;font-weight:850}
+.auto .score{background:var(--okbg);color:var(--ok)}.manual .score{background:var(--warnbg);color:var(--warn)}
+.title{font-weight:780;line-height:1.25;font-size:15px;margin:2px 0 5px}.meta{font-size:11px;color:var(--muted)}.reason{font-size:12px;color:#59636b;line-height:1.45;margin:12px 0}
+.actions{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}
+nav{position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px solid var(--line);padding:11px 8px max(14px,env(safe-area-inset-bottom));display:flex;justify-content:space-around;font-size:11px;color:#68737c}
+.statusline{font-size:11px;color:var(--muted);margin-top:8px}
+</style><script src="config.js"></script></head><body><main>
+<header><div><h1>Trabajo</h1><div class="sub">Buscador inteligente</div></div><span class="live">● cada 1 h</span></header>
+
+<section class="setup">
+<h2>Activar en este teléfono</h2>
+<p>Instalá la app y permití notificaciones para recibir avisos de oportunidades aunque no tengas abierto el panel.</p>
+<div class="setup-actions"><button class="primary" id="notifyBtn">Activar alertas</button><button class="secondary" id="installBtn">Instalar app</button></div>
+<div class="statusline" id="setupStatus">Notificaciones todavía no configuradas.</div>
+</section>
+
+<div class="alert"><div style="font-size:22px">🔔</div><div><b>Alertas prioritarias</b><p>75%+ para postular · 50–74% para revisar · menos de 50% silencioso.</p></div></div>
+<div class="tabs"><button class="tab" onclick="filterJobs('all')">Todas</button><button class="tab" onclick="filterJobs('auto_apply')">Para postular</button><button class="tab" onclick="filterJobs('manual_review')">Revisar</button></div>
+<section id="jobs"></section>
+</main><nav><span>⌂ Inicio</span><span>🔔 Alertas</span><span>✓ Historial</span><span>⚙ Ajustes</span></nav>
+<script>
+const API='';
+const jobs=[{"title": "Administrativa/Telefonista en Montevideo", "location": "Montevideo", "remote": false, "age_hours": 4, "description": "Oferta administrativa/telefonista en Montevideo. Publicada hace 4 horas.", "source": "Buscojobs Uruguay", "score": 80, "decision": "auto_apply", "reasons": ["experiencia administrativa/atención compatible", "Montevideo", "muy reciente (≤12 h)"], "warnings": []}, {"title": "Cajero/a Administrativo/a", "location": "Montevideo", "remote": false, "age_hours": 4, "description": "Oferta de cajero/a administrativo/a en Montevideo. Primer empleo.", "source": "Buscojobs Uruguay", "score": 80, "decision": "auto_apply", "reasons": ["experiencia administrativa/atención compatible", "Montevideo", "muy reciente (≤12 h)"], "warnings": []}, {"title": "ADMINISTRATIVO/A", "location": "Montevideo", "remote": false, "age_hours": 6, "description": "Oferta administrativa en Montevideo publicada hace 6 horas.", "source": "Buscojobs Uruguay", "score": 80, "decision": "auto_apply", "reasons": ["experiencia administrativa/atención compatible", "Montevideo", "muy reciente (≤12 h)"], "warnings": []}, {"title": "AUXILIAR ADMINISTRATIVO CON INGLÉS ESCRITO Y ORAL", "location": "Montevideo", "remote": false, "age_hours": 8, "schedule": "Lunes a viernes de 10 a 18 y sábados de 9 a 13", "education": "Bachillerato de Administración UTU o estudiante de primeros años de facultad", "description": "Se requiere inglés oral y escrito. Bachillerato de Administración UTU o estudiante de primeros años de facultad. Se valora experiencia administrativa.", "source": "Buscojobs Uruguay", "score": 67, "decision": "manual_review", "reasons": ["experiencia administrativa/atención compatible", "Montevideo", "muy reciente (≤12 h)", "jornada diurna prioritaria", "incluye fin de semana (aceptado, menor prioridad)"], "warnings": ["inglés requerido sin nivel claro", "formación terciaria deseable"]}, {"title": "Administrativo", "location": "Montevideo", "remote": false, "age_hours": 48, "schedule": "Lunes a viernes, 40 horas semanales", "education": "Secundaria completa", "description": "Bachillerato completo. Office, Word y Excel. Cursos vinculados a atención al cliente. Experiencia mínima de 12 meses en tareas similares.", "source": "Buscojobs Uruguay", "score": 82, "decision": "auto_apply", "reasons": ["experiencia administrativa/atención compatible", "Montevideo", "dentro de 48 h", "formación compatible", "jornada diurna prioritaria"], "warnings": []}, {"title": "Auxiliar administrativo de RRHH - Montevideo", "location": "Montevideo", "remote": false, "age_hours": 48, "schedule": "Lunes a viernes 7:30 a 16:18", "education": "Secundaria completa", "description": "Bachillerato completo. Experiencia administrativa. Excel nivel intermedio/avanzado excluyente, con prueba técnica.", "source": "Buscojobs Uruguay", "score": 74, "decision": "manual_review", "reasons": ["experiencia administrativa/atención compatible", "Montevideo", "dentro de 48 h", "formación compatible", "jornada diurna prioritaria"], "warnings": ["Excel avanzado/intermedio-avanzado excluyente: validar manualmente"]}];
+let deferredPrompt=null;
+window.addEventListener('beforeinstallprompt', e=>{e.preventDefault();deferredPrompt=e;});
+document.getElementById('installBtn').onclick=async()=>{
+ if(deferredPrompt){deferredPrompt.prompt();await deferredPrompt.userChoice;deferredPrompt=null;}
+ else document.getElementById('setupStatus').textContent='En Chrome: menú ⋮ → Agregar a pantalla principal / Instalar app.';
+};
+if('serviceWorker' in navigator) navigator.serviceWorker.register('./service-worker.js');
+
+function b64ToUint8(base64){
+ const padding='='.repeat((4-base64.length%4)%4);
+ const b64=(base64+padding).replace(/-/g,'+').replace(/_/g,'/');
+ const raw=atob(b64); return Uint8Array.from([...raw].map(c=>c.charCodeAt(0)));
+}
+document.getElementById('notifyBtn').onclick=async()=>{
+ const st=document.getElementById('setupStatus');
+ try{
+  if(!('serviceWorker' in navigator)||!('PushManager' in window)) throw new Error('Este navegador no admite Web Push.');
+  const perm=await Notification.requestPermission();
+  if(perm!=='granted') throw new Error('Permiso de notificaciones no concedido.');
+  const reg=await navigator.serviceWorker.ready;
+  const cfg=await fetch(API+'/api/push-config').then(r=>r.json());
+  if(!cfg.publicKey) throw new Error('Falta configurar la clave pública del servidor.');
+  let sub=await reg.pushManager.getSubscription();
+  if(!sub) sub=await reg.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:b64ToUint8(cfg.publicKey)});
+  await fetch(API+'/api/push/subscribe',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(sub)});
+  st.textContent='✓ Alertas activadas en este teléfono.';
+ }catch(e){st.textContent='No se pudieron activar: '+e.message;}
+};
+
+function esc(s){return String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
+const box=document.getElementById('jobs');
+function render(filter='all'){
+ box.innerHTML='';
+ jobs.filter(j=>filter==='all'?j.decision!=='discard':j.decision===filter).sort((a,b)=>b.score-a.score).forEach(j=>{
+  const manual=j.decision==='manual_review', cls=manual?'manual':'auto';
+  const action=manual?'Revisar ahora':'Preparar postulación', url=j.url||'#';
+  const reasons=[...(j.reasons||[]),...(j.warnings||[]).map(x=>'⚠ '+x)].slice(0,4).join(' · ');
+  box.insertAdjacentHTML('beforeend',`<article class="card ${cls}"><div class="head"><div class="score">${j.score}%</div><div><div class="title">${esc(j.title)}</div><div class="meta">${esc(j.location||'')} · hace ${j.age_hours??'?'} h</div></div></div><div class="reason">${esc(reasons)}</div><div class="actions"><a class="primary" href="${esc(url)}" target="_blank" rel="noopener">${action}</a><button class="secondary" onclick="alert(${JSON.stringify((j.description||'Sin detalle').slice(0,800))})">Ver detalle</button></div></article>`);
+ });
+}
+function filterJobs(x){render(x)} render();
+
+async function loadLiveJobs(){
+ const c=window.TRABAJO_CONFIG||{};
+ if(!c.SUPABASE_URL||!c.SUPABASE_ANON_KEY) return;
+ try{
+   const r=await fetch(c.SUPABASE_URL.replace(/\/$/,'')+'/rest/v1/offers?select=payload&decision=in.(auto_apply,manual_review)&order=first_seen.desc&limit=100',{
+     headers:{apikey:c.SUPABASE_ANON_KEY,Authorization:'Bearer '+c.SUPABASE_ANON_KEY}
+   });
+   if(!r.ok) throw new Error('HTTP '+r.status);
+   const rows=await r.json();
+   if(rows.length){ jobs.splice(0,jobs.length,...rows.map(x=>x.payload)); render(); }
+ }catch(e){ console.warn('Modo demo:',e); }
+}
+loadLiveJobs();
+
+</script></body></html>

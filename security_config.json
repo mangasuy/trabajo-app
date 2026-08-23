@@ -1,0 +1,13 @@
+{
+  "credentials_storage": "none",
+  "session_strategy": "persistent_browser_profile",
+  "password_visible_to_app": false,
+  "automatic_submission_enabled": false,
+  "requires_user_login_once": true,
+  "notes": [
+    "El usuario inicia sesión directamente en Buscojobs.",
+    "La aplicación reutiliza la sesión del navegador.",
+    "No se guarda email ni contraseña en archivos de configuración.",
+    "La postulación automática permanece desactivada hasta validar el flujo autenticado."
+  ]
+}

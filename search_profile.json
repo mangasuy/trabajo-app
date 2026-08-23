@@ -1,0 +1,75 @@
+{
+  "version": "1.0",
+  "search": {
+    "frequency_minutes": 60,
+    "max_offer_age_hours": 48,
+    "sources": [
+      "Buscojobs Uruguay",
+      "Computrabajo Uruguay",
+      "LinkedIn Jobs",
+      "Gallito",
+      "Workana"
+    ]
+  },
+  "thresholds": {
+    "auto_apply_min": 75,
+    "manual_review_min": 50,
+    "discard_below": 50
+  },
+  "location": {
+    "onsite_hybrid": [
+      "Montevideo"
+    ],
+    "remote_uruguay": true,
+    "remote_international": true,
+    "international_must_accept_uruguay": true
+  },
+  "schedule": {
+    "preferred_hours_per_day": 8,
+    "preferred_days": [
+      "lunes",
+      "martes",
+      "miércoles",
+      "jueves",
+      "viernes"
+    ],
+    "weekends_allowed": true,
+    "night_work_allowed": false,
+    "morning_allowed": true,
+    "afternoon_allowed": true
+  },
+  "contract": {
+    "permanent_preferred": true,
+    "temporary_replacement_allowed": true
+  },
+  "salary": {
+    "minimum_uyu": 30000,
+    "missing_salary_penalty": 0,
+    "below_minimum_action": "manual_review"
+  },
+  "hard_exclusions_when_required": [
+    "libreta de conducir",
+    "moto propia",
+    "vehículo propio",
+    "inglés avanzado",
+    "título universitario",
+    "trabajo nocturno",
+    "presencial fuera de Montevideo"
+  ],
+  "education": {
+    "secondary_bachillerato": true,
+    "university_degree": false,
+    "university_required_action": "discard",
+    "university_desirable_action": "penalize"
+  },
+  "notifications": {
+    "manual_review_immediate": true,
+    "manual_apply_immediate": true,
+    "discard_notifications": false
+  },
+  "cv": {
+    "adapt_per_offer": true,
+    "invent_information": false,
+    "preserve_truth": true
+  }
+}

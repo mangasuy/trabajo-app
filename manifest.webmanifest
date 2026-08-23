@@ -1,0 +1,11 @@
+{
+  "name": "Trabajo — Buscador inteligente",
+  "short_name": "Trabajo",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f4f6f8",
+  "theme_color": "#52697b",
+  "description": "Buscador laboral con filtros, scoring y alertas.",
+  "icons": []
+}

@@ -1,0 +1,8 @@
+{
+  "api_base": "http://127.0.0.1:8787",
+  "poll_minutes": 60,
+  "deduplication": "sha256(source|url|title|company)",
+  "persist_history": true,
+  "push_notifications": "next_stage",
+  "server_required_for_hourly_search": true
+}

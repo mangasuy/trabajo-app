@@ -1,0 +1,30 @@
+{
+  "poll_minutes": 60,
+  "notification_rules": {
+    "auto_apply_candidate": {
+      "min_score": 75,
+      "message": "Oferta compatible detectada",
+      "action": "Preparar postulación"
+    },
+    "manual_review": {
+      "min_score": 50,
+      "max_score": 74,
+      "message": "Oferta para revisar",
+      "action": "Revisar ahora"
+    },
+    "discard": {
+      "max_score": 49,
+      "notify": false
+    }
+  },
+  "mobile_handoff": {
+    "open_original_offer": true,
+    "prefer_external_browser": true,
+    "portal_session_expected": true
+  },
+  "safety": {
+    "auto_submit": false,
+    "unknown_required_field": "manual_review",
+    "unknown_exclusion": "manual_review"
+  }
+}
