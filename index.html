@@ -22,77 +22,168 @@ button,a{border:0;border-radius:13px;padding:12px;text-align:center;text-decorat
 .actions{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}
 nav{position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px solid var(--line);padding:11px 8px max(14px,env(safe-area-inset-bottom));display:flex;justify-content:space-around;font-size:11px;color:#68737c}
 .statusline{font-size:11px;color:var(--muted);margin-top:8px}
+.view{display:none}.view.active{display:block}
+.navbtn{background:transparent;color:#68737c;padding:4px 8px;border-radius:10px;font-weight:650}
+.navbtn.active{color:var(--accent);background:#eef1f3}
+.empty{background:#fff;border:1px solid var(--line);border-radius:20px;padding:22px 18px;text-align:center;color:var(--muted);margin-top:12px}
+.empty b{display:block;color:var(--txt);font-size:15px;margin-bottom:5px}
+.settings-card{background:#fff;border:1px solid var(--line);border-radius:20px;padding:17px;margin:11px 0}
+.settings-card h3{margin:0 0 8px;font-size:14px}.settings-card p{margin:5px 0;color:var(--muted);font-size:12px;line-height:1.45}
+.badge{display:inline-block;border-radius:999px;padding:6px 9px;background:var(--okbg);color:var(--ok);font-size:11px;font-weight:750}
+.disabled-link{opacity:.5;pointer-events:none}
 </style><script src="config.js"></script></head><body><main>
 <header><div><h1>Trabajo</h1><div class="sub">Buscador inteligente</div></div><span class="live">● cada 1 h</span></header>
 
+
+<section id="homeView" class="view active">
 <section class="setup">
 <h2>Activar en este teléfono</h2>
-<p>Instalá la app y permití notificaciones para recibir avisos de oportunidades aunque no tengas abierto el panel.</p>
+<p>Podés instalar la app. Las notificaciones automáticas se habilitarán cuando terminemos de configurar el proceso de búsqueda horaria.</p>
 <div class="setup-actions"><button class="primary" id="notifyBtn">Activar alertas</button><button class="secondary" id="installBtn">Instalar app</button></div>
-<div class="statusline" id="setupStatus">Notificaciones todavía no configuradas.</div>
+<div class="statusline" id="setupStatus">Notificaciones automáticas todavía no configuradas.</div>
 </section>
 
 <div class="alert"><div style="font-size:22px">🔔</div><div><b>Alertas prioritarias</b><p>75%+ para postular · 50–74% para revisar · menos de 50% silencioso.</p></div></div>
 <div class="tabs"><button class="tab" onclick="filterJobs('all')">Todas</button><button class="tab" onclick="filterJobs('auto_apply')">Para postular</button><button class="tab" onclick="filterJobs('manual_review')">Revisar</button></div>
 <section id="jobs"></section>
-</main><nav><span>⌂ Inicio</span><span>🔔 Alertas</span><span>✓ Historial</span><span>⚙ Ajustes</span></nav>
+</section>
+
+<section id="alertsView" class="view">
+  <div class="settings-card">
+    <h3>🔔 Alertas</h3>
+    <p>Acá aparecerán las oportunidades nuevas que requieran tu atención cuando la búsqueda automática esté activa.</p>
+    <div id="alertsList" class="empty"><b>Sin alertas todavía</b>Las alertas reales llegarán desde Supabase.</div>
+  </div>
+</section>
+
+<section id="historyView" class="view">
+  <div class="settings-card">
+    <h3>✓ Historial</h3>
+    <p>Registro local de ofertas que abriste desde este teléfono.</p>
+    <div id="historyList"></div>
+  </div>
+</section>
+
+<section id="settingsView" class="view">
+  <div class="settings-card">
+    <h3>⚙ Ajustes</h3>
+    <p><span class="badge">Supabase conectado</span></p>
+    <p><b>Frecuencia prevista:</b> cada 1 hora.</p>
+    <p><b>Postular:</b> 75–100%.</p>
+    <p><b>Revisar manualmente:</b> 50–74%.</p>
+    <p><b>Descartar:</b> menos de 50%.</p>
+    <p><b>Zona:</b> Montevideo, más remotos internacionales compatibles.</p>
+    <p><b>Turno:</b> diurno; sin trabajo nocturno.</p>
+    <p id="connectionStatus">Comprobando conexión con Supabase…</p>
+  </div>
+</section>
+</main>
+<nav>
+<button class="navbtn active" data-view="homeView">⌂ Inicio</button>
+<button class="navbtn" data-view="alertsView">🔔 Alertas</button>
+<button class="navbtn" data-view="historyView">✓ Historial</button>
+<button class="navbtn" data-view="settingsView">⚙ Ajustes</button>
+</nav>
 <script>
-const API='';
-const jobs=[{"title": "Administrativa/Telefonista en Montevideo", "location": "Montevideo", "remote": false, "age_hours": 4, "description": "Oferta administrativa/telefonista en Montevideo. Publicada hace 4 horas.", "source": "Buscojobs Uruguay", "score": 80, "decision": "auto_apply", "reasons": ["experiencia administrativa/atención compatible", "Montevideo", "muy reciente (≤12 h)"], "warnings": []}, {"title": "Cajero/a Administrativo/a", "location": "Montevideo", "remote": false, "age_hours": 4, "description": "Oferta de cajero/a administrativo/a en Montevideo. Primer empleo.", "source": "Buscojobs Uruguay", "score": 80, "decision": "auto_apply", "reasons": ["experiencia administrativa/atención compatible", "Montevideo", "muy reciente (≤12 h)"], "warnings": []}, {"title": "ADMINISTRATIVO/A", "location": "Montevideo", "remote": false, "age_hours": 6, "description": "Oferta administrativa en Montevideo publicada hace 6 horas.", "source": "Buscojobs Uruguay", "score": 80, "decision": "auto_apply", "reasons": ["experiencia administrativa/atención compatible", "Montevideo", "muy reciente (≤12 h)"], "warnings": []}, {"title": "AUXILIAR ADMINISTRATIVO CON INGLÉS ESCRITO Y ORAL", "location": "Montevideo", "remote": false, "age_hours": 8, "schedule": "Lunes a viernes de 10 a 18 y sábados de 9 a 13", "education": "Bachillerato de Administración UTU o estudiante de primeros años de facultad", "description": "Se requiere inglés oral y escrito. Bachillerato de Administración UTU o estudiante de primeros años de facultad. Se valora experiencia administrativa.", "source": "Buscojobs Uruguay", "score": 67, "decision": "manual_review", "reasons": ["experiencia administrativa/atención compatible", "Montevideo", "muy reciente (≤12 h)", "jornada diurna prioritaria", "incluye fin de semana (aceptado, menor prioridad)"], "warnings": ["inglés requerido sin nivel claro", "formación terciaria deseable"]}, {"title": "Administrativo", "location": "Montevideo", "remote": false, "age_hours": 48, "schedule": "Lunes a viernes, 40 horas semanales", "education": "Secundaria completa", "description": "Bachillerato completo. Office, Word y Excel. Cursos vinculados a atención al cliente. Experiencia mínima de 12 meses en tareas similares.", "source": "Buscojobs Uruguay", "score": 82, "decision": "auto_apply", "reasons": ["experiencia administrativa/atención compatible", "Montevideo", "dentro de 48 h", "formación compatible", "jornada diurna prioritaria"], "warnings": []}, {"title": "Auxiliar administrativo de RRHH - Montevideo", "location": "Montevideo", "remote": false, "age_hours": 48, "schedule": "Lunes a viernes 7:30 a 16:18", "education": "Secundaria completa", "description": "Bachillerato completo. Experiencia administrativa. Excel nivel intermedio/avanzado excluyente, con prueba técnica.", "source": "Buscojobs Uruguay", "score": 74, "decision": "manual_review", "reasons": ["experiencia administrativa/atención compatible", "Montevideo", "dentro de 48 h", "formación compatible", "jornada diurna prioritaria"], "warnings": ["Excel avanzado/intermedio-avanzado excluyente: validar manualmente"]}];
+const jobs=[];
+let currentFilter='all';
 let deferredPrompt=null;
+
 window.addEventListener('beforeinstallprompt', e=>{e.preventDefault();deferredPrompt=e;});
 document.getElementById('installBtn').onclick=async()=>{
+ const st=document.getElementById('setupStatus');
  if(deferredPrompt){deferredPrompt.prompt();await deferredPrompt.userChoice;deferredPrompt=null;}
- else document.getElementById('setupStatus').textContent='En Chrome: menú ⋮ → Agregar a pantalla principal / Instalar app.';
+ else st.textContent='En Chrome: menú ⋮ → Agregar a pantalla principal / Instalar app.';
 };
 if('serviceWorker' in navigator) navigator.serviceWorker.register('./service-worker.js');
 
-function b64ToUint8(base64){
- const padding='='.repeat((4-base64.length%4)%4);
- const b64=(base64+padding).replace(/-/g,'+').replace(/_/g,'/');
- const raw=atob(b64); return Uint8Array.from([...raw].map(c=>c.charCodeAt(0)));
-}
-document.getElementById('notifyBtn').addEventListener('click', async ()=>{
- const st=document.getElementById('setupStatus');
- try{
-  if(!('serviceWorker' in navigator)||!('PushManager' in window)) throw new Error('Este navegador no admite Web Push.');
-  const perm=await Notification.requestPermission();
-  if(perm!=='granted') throw new Error('Permiso de notificaciones no concedido.');
-  const reg=await navigator.serviceWorker.ready;
-  const cfg=await fetch(API+'/api/push-config').then(r=>r.json());
-  if(!cfg.publicKey) throw new Error('Falta configurar la clave pública del servidor.');
-  let sub=await reg.pushManager.getSubscription();
-  if(!sub) sub=await reg.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:b64ToUint8(cfg.publicKey)});
-  await fetch(API+'/api/push/subscribe',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(sub)});
-  st.textContent='✓ Alertas activadas en este teléfono.';
- }catch(e){st.textContent='No se pudieron activar: '+e.message;}
-});
+document.getElementById('notifyBtn').onclick=()=>{
+ document.getElementById('setupStatus').textContent='La interfaz ya está lista. Falta activar el buscador horario y el envío de notificaciones.';
+};
 
 function esc(s){return String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
 const box=document.getElementById('jobs');
-function render(filter='all'){
- box.innerHTML='';
- jobs.filter(j=>filter==='all'?j.decision!=='discard':j.decision===filter).sort((a,b)=>b.score-a.score).forEach(j=>{
-  const manual=j.decision==='manual_review', cls=manual?'manual':'auto';
-  const action=manual?'Revisar ahora':'Preparar postulación', url=j.url||'#';
-  const reasons=[...(j.reasons||[]),...(j.warnings||[]).map(x=>'⚠ '+x)].slice(0,4).join(' · ');
-  box.insertAdjacentHTML('beforeend',`<article class="card ${cls}"><div class="head"><div class="score">${j.score}%</div><div><div class="title">${esc(j.title)}</div><div class="meta">${esc(j.location||'')} · hace ${j.age_hours??'?'} h</div></div></div><div class="reason">${esc(reasons)}</div><div class="actions"><a class="primary" href="${esc(url)}" target="_blank" rel="noopener">${action}</a><button class="secondary" onclick="alert(${JSON.stringify((j.description||'Sin detalle').slice(0,800))})">Ver detalle</button></div></article>`);
- });
+
+function addHistory(j){
+ const item={title:j.title||'Oferta', company:j.company||'', url:j.url||j.external_url||'', at:new Date().toISOString()};
+ const h=JSON.parse(localStorage.getItem('trabajo_history')||'[]');
+ const next=[item,...h.filter(x=>x.url!==item.url || x.title!==item.title)].slice(0,50);
+ localStorage.setItem('trabajo_history',JSON.stringify(next));
+ renderHistory();
 }
-function filterJobs(x){render(x)} render();
+function renderHistory(){
+ const el=document.getElementById('historyList');
+ const h=JSON.parse(localStorage.getItem('trabajo_history')||'[]');
+ if(!h.length){el.innerHTML='<div class="empty"><b>Sin historial todavía</b>Las ofertas que abras aparecerán acá.</div>';return;}
+ el.innerHTML=h.map(x=>`<div class="card"><div class="title">${esc(x.title)}</div><div class="meta">${esc(x.company||'')} · ${new Date(x.at).toLocaleString()}</div>${x.url?`<div class="actions"><a class="primary" href="${esc(x.url)}" target="_blank" rel="noopener">Abrir de nuevo</a></div>`:''}</div>`).join('');
+}
+
+function render(filter=currentFilter){
+ currentFilter=filter;
+ box.innerHTML='';
+ const visible=jobs.filter(j=>filter==='all'?j.decision!=='discard':j.decision===filter).sort((a,b)=>(b.score||0)-(a.score||0));
+ if(!visible.length){
+   box.innerHTML='<div class="empty"><b>No hay ofertas reales todavía</b>La interfaz está conectada a Supabase, pero aún falta activar la búsqueda automática cada hora.</div>';
+   return;
+ }
+ visible.forEach((j,idx)=>{
+  const manual=j.decision==='manual_review', cls=manual?'manual':'auto';
+  const action=manual?'Revisar ahora':'Preparar postulación';
+  const url=j.external_url||j.url||'';
+  const reasons=[...(j.reasons||[]),...(j.warnings||[]).map(x=>'⚠ '+x)].slice(0,4).join(' · ');
+  const link=url
+    ? `<a class="primary" href="${esc(url)}" target="_blank" rel="noopener" data-job="${idx}">${action}</a>`
+    : `<span class="primary disabled-link">Sin enlace disponible</span>`;
+  box.insertAdjacentHTML('beforeend',`<article class="card ${cls}"><div class="head"><div class="score">${j.score??0}%</div><div><div class="title">${esc(j.title)}</div><div class="meta">${esc(j.company||j.source||'')} · ${esc(j.location||'')} ${j.age_hours!=null?'· hace '+esc(j.age_hours)+' h':''}</div></div></div><div class="reason">${esc(reasons||j.description||'Sin detalle adicional.')}</div><div class="actions">${link}<button class="secondary" data-detail="${idx}">Ver detalle</button></div></article>`);
+ });
+ box.querySelectorAll('[data-job]').forEach(a=>a.addEventListener('click',()=>addHistory(visible[Number(a.dataset.job)])));
+ box.querySelectorAll('[data-detail]').forEach(b=>b.addEventListener('click',()=>alert((visible[Number(b.dataset.detail)].description||'Sin detalle').slice(0,1200))));
+}
+function filterJobs(x){render(x)}
+
+document.querySelectorAll('.navbtn').forEach(btn=>{
+ btn.addEventListener('click',()=>{
+   document.querySelectorAll('.navbtn').forEach(x=>x.classList.remove('active'));
+   document.querySelectorAll('.view').forEach(x=>x.classList.remove('active'));
+   btn.classList.add('active');
+   document.getElementById(btn.dataset.view).classList.add('active');
+   if(btn.dataset.view==='historyView') renderHistory();
+ });
+});
 
 async function loadLiveJobs(){
  const c=window.TRABAJO_CONFIG||{};
- if(!c.SUPABASE_URL||!c.SUPABASE_ANON_KEY) return;
+ const st=document.getElementById('connectionStatus');
+ if(!c.SUPABASE_URL||!c.SUPABASE_ANON_KEY){
+   st.textContent='Supabase: falta configuración.';
+   render();
+   return;
+ }
  try{
-   const r=await fetch(c.SUPABASE_URL.replace(/\/$/,'')+'/rest/v1/offers?select=payload&decision=in.(auto_apply,manual_review)&order=first_seen.desc&limit=100',{
+   const r=await fetch(c.SUPABASE_URL.replace(/\/$/,'')+'/rest/v1/offers?select=id,title,company,location,score,decision,external_url,first_seen,payload&decision=in.(auto_apply,manual_review)&order=first_seen.desc&limit=100',{
      headers:{apikey:c.SUPABASE_ANON_KEY,Authorization:'Bearer '+c.SUPABASE_ANON_KEY}
    });
    if(!r.ok) throw new Error('HTTP '+r.status);
    const rows=await r.json();
-   if(rows.length){ jobs.splice(0,jobs.length,...rows.map(x=>x.payload)); render(); }
- }catch(e){ console.warn('Modo demo:',e); }
+   const normalized=rows.map(x=>({
+      ...(x.payload||{}),
+      id:x.id,
+      title:x.title || x.payload?.title,
+      company:x.company || x.payload?.company,
+      location:x.location || x.payload?.location,
+      score:x.score ?? x.payload?.score,
+      decision:x.decision || x.payload?.decision,
+      external_url:x.external_url || x.payload?.external_url || x.payload?.url,
+      first_seen:x.first_seen
+   }));
+   jobs.splice(0,jobs.length,...normalized);
+   st.textContent='Supabase: conectado. '+rows.length+' ofertas disponibles.';
+   render();
+ }catch(e){
+   st.textContent='Supabase: error de conexión ('+e.message+').';
+   render();
+ }
 }
+renderHistory();
 loadLiveJobs();
-
 </script></body></html>
