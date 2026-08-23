@@ -24,4 +24,7 @@ jobs:
           if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
 
       - name: Ejecutar búsqueda
-        run: python hourly.py
+  env:
+    SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+    SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+  run: python hourly.py 
