@@ -1,0 +1,29 @@
+[
+  {
+    "title": "Administrativo",
+    "location": "Montevideo",
+    "age_hours": 48,
+    "schedule": "Lunes a viernes de 9 a 18hs",
+    "description": "Tareas administrativas. Secundaria completa. Inglés valorado. Informática y Office."
+  },
+  {
+    "title": "Personal para SUPLENCIAS de Cadete - Telefonista - Administrativo",
+    "location": "Montevideo",
+    "age_hours": 24,
+    "description": "Suplencias. Bachillerato completo. Curso Operador Office. Jornada completa."
+  },
+  {
+    "title": "Auxiliar Administrativo/a para Posventa",
+    "location": "Montevideo",
+    "age_hours": 4,
+    "schedule": "Lunes a viernes 10 a 19 y sábados 10 a 14",
+    "description": "Formación terciaria en Administración excluyente. Excel intermedio. ERP. Secundaria completa."
+  },
+  {
+    "title": "Auxiliar Administrativo para Cobranzas",
+    "location": "Montevideo",
+    "age_hours": 24,
+    "schedule": "Lunes a viernes 8 a 17 y sábado 8 a 12",
+    "description": "Memory Fígaro requisito excluyente. Experiencia en cobranzas. Secundaria completa."
+  }
+]

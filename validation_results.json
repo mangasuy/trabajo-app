@@ -1,0 +1,115 @@
+[
+  {
+    "title": "Administrativa/Telefonista en Montevideo",
+    "location": "Montevideo",
+    "remote": false,
+    "age_hours": 4,
+    "description": "Oferta administrativa/telefonista en Montevideo. Publicada hace 4 horas.",
+    "source": "Buscojobs Uruguay",
+    "score": 80,
+    "decision": "auto_apply",
+    "reasons": [
+      "experiencia administrativa/atención compatible",
+      "Montevideo",
+      "muy reciente (≤12 h)"
+    ],
+    "warnings": []
+  },
+  {
+    "title": "Cajero/a Administrativo/a",
+    "location": "Montevideo",
+    "remote": false,
+    "age_hours": 4,
+    "description": "Oferta de cajero/a administrativo/a en Montevideo. Primer empleo.",
+    "source": "Buscojobs Uruguay",
+    "score": 80,
+    "decision": "auto_apply",
+    "reasons": [
+      "experiencia administrativa/atención compatible",
+      "Montevideo",
+      "muy reciente (≤12 h)"
+    ],
+    "warnings": []
+  },
+  {
+    "title": "ADMINISTRATIVO/A",
+    "location": "Montevideo",
+    "remote": false,
+    "age_hours": 6,
+    "description": "Oferta administrativa en Montevideo publicada hace 6 horas.",
+    "source": "Buscojobs Uruguay",
+    "score": 80,
+    "decision": "auto_apply",
+    "reasons": [
+      "experiencia administrativa/atención compatible",
+      "Montevideo",
+      "muy reciente (≤12 h)"
+    ],
+    "warnings": []
+  },
+  {
+    "title": "AUXILIAR ADMINISTRATIVO CON INGLÉS ESCRITO Y ORAL",
+    "location": "Montevideo",
+    "remote": false,
+    "age_hours": 8,
+    "schedule": "Lunes a viernes de 10 a 18 y sábados de 9 a 13",
+    "education": "Bachillerato de Administración UTU o estudiante de primeros años de facultad",
+    "description": "Se requiere inglés oral y escrito. Bachillerato de Administración UTU o estudiante de primeros años de facultad. Se valora experiencia administrativa.",
+    "source": "Buscojobs Uruguay",
+    "score": 67,
+    "decision": "manual_review",
+    "reasons": [
+      "experiencia administrativa/atención compatible",
+      "Montevideo",
+      "muy reciente (≤12 h)",
+      "jornada diurna prioritaria",
+      "incluye fin de semana (aceptado, menor prioridad)"
+    ],
+    "warnings": [
+      "inglés requerido sin nivel claro",
+      "formación terciaria deseable"
+    ]
+  },
+  {
+    "title": "Administrativo",
+    "location": "Montevideo",
+    "remote": false,
+    "age_hours": 48,
+    "schedule": "Lunes a viernes, 40 horas semanales",
+    "education": "Secundaria completa",
+    "description": "Bachillerato completo. Office, Word y Excel. Cursos vinculados a atención al cliente. Experiencia mínima de 12 meses en tareas similares.",
+    "source": "Buscojobs Uruguay",
+    "score": 82,
+    "decision": "auto_apply",
+    "reasons": [
+      "experiencia administrativa/atención compatible",
+      "Montevideo",
+      "dentro de 48 h",
+      "formación compatible",
+      "jornada diurna prioritaria"
+    ],
+    "warnings": []
+  },
+  {
+    "title": "Auxiliar administrativo de RRHH - Montevideo",
+    "location": "Montevideo",
+    "remote": false,
+    "age_hours": 48,
+    "schedule": "Lunes a viernes 7:30 a 16:18",
+    "education": "Secundaria completa",
+    "description": "Bachillerato completo. Experiencia administrativa. Excel nivel intermedio/avanzado excluyente, con prueba técnica.",
+    "source": "Buscojobs Uruguay",
+    "score": 74,
+    "decision": "manual_review",
+    "reasons": [
+      "experiencia administrativa/atención compatible",
+      "Montevideo",
+      "dentro de 48 h",
+      "formación compatible",
+      "jornada diurna prioritaria"
+    ],
+    "warnings": [
+      "Excel avanzado/intermedio-avanzado excluyente: validar manualmente"
+    ]
+  }
+]
