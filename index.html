@@ -30,7 +30,7 @@ nav{position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px solid 
 .settings-card{background:#fff;border:1px solid var(--line);border-radius:20px;padding:17px;margin:11px 0}
 .settings-card h3{margin:0 0 8px;font-size:14px}.settings-card p{margin:5px 0;color:var(--muted);font-size:12px;line-height:1.45}
 .badge{display:inline-block;border-radius:999px;padding:6px 9px;background:var(--okbg);color:var(--ok);font-size:11px;font-weight:750}
-.disabled-link{opacity:.5;pointer-events:none}
+.disabled-link{opacity:.5;pointer-events:none}.when{font-size:11px;color:var(--muted);margin-top:4px}.sourcebadge{display:inline-block;background:#eef1f3;color:#59656e;border-radius:999px;padding:3px 7px;font-size:10px;font-weight:750;margin-right:5px}
 </style><script src="config.js"></script></head><body><main>
 <header><div><h1>Trabajo</h1><div class="sub">Buscador inteligente</div></div><span class="live">● cada 1 h</span></header>
 
@@ -102,6 +102,51 @@ document.getElementById('notifyBtn').onclick=()=>{
 };
 
 function esc(s){return String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
+
+function parseDate(v){
+  if(!v) return null;
+  const d=new Date(v);
+  return Number.isNaN(d.getTime())?null:d;
+}
+function relativeTime(v){
+  const d=parseDate(v);
+  if(!d) return '';
+  const diff=Math.max(0,Date.now()-d.getTime());
+  const mins=Math.floor(diff/60000);
+  if(mins<2) return 'Detectada recién';
+  if(mins<60) return `Detectada hace ${mins} min`;
+  const h=Math.floor(mins/60);
+  if(h<24) return `Detectada hace ${h} h`;
+  const days=Math.floor(h/24);
+  if(days===1) return 'Detectada ayer';
+  if(days<7) return `Detectada hace ${days} días`;
+  return 'Detectada '+d.toLocaleDateString('es-UY',{day:'2-digit',month:'2-digit'});
+}
+function jobWhen(j){
+  if(j.published_at){
+    const d=parseDate(j.published_at);
+    if(d){
+      const diff=Math.max(0,Date.now()-d.getTime());
+      const h=Math.floor(diff/3600000);
+      if(h<1) return 'Publicada hace menos de 1 h';
+      if(h<24) return `Publicada hace ${h} h`;
+      const days=Math.floor(h/24);
+      return days===1?'Publicada ayer':`Publicada hace ${days} días`;
+    }
+  }
+  if(j.age_hours!=null && Number.isFinite(Number(j.age_hours))){
+    const h=Math.max(0,Math.round(Number(j.age_hours)));
+    return h===0?'Publicada hace menos de 1 h':`Publicada hace ${h} h`;
+  }
+  return relativeTime(j.first_seen||j.created_at||j.detected_at);
+}
+function isJunkTitle(title){
+  const t=String(title||'').trim().toLowerCase();
+  if(!t) return true;
+  if(['ver más ofertas','ver mas ofertas','cpa empleo','ofertas por localización','ofertas por localizacion','ofertas por función laboral','ofertas por funcion laboral'].includes(t)) return true;
+  if(/^(administraci[oó]n|ventas|oficios|gesti[oó]n|distribuci[oó]n|atenci[oó]n al cliente|contabilidad\/auditor[ií]as|producci[oó]n|tecnolog[ií]a de la informaci[oó]n|manufactura|atenci[oó]n m[eé]dica|marketing|construcci[oó]n|otro)\s+\d+$/i.test(t)) return true;
+  return false;
+}
 const box=document.getElementById('jobs');
 
 function addHistory(j){
@@ -121,23 +166,43 @@ function renderHistory(){
 function render(filter=currentFilter){
  currentFilter=filter;
  box.innerHTML='';
- const visible=jobs.filter(j=>filter==='all'?j.decision!=='discard':j.decision===filter).sort((a,b)=>(b.score||0)-(a.score||0));
+ const visible=jobs
+   .filter(j=>!isJunkTitle(j.title))
+   .filter(j=>filter==='all'?j.decision!=='discard':j.decision===filter)
+   .sort((a,b)=>{
+      const ad=parseDate(a.first_seen)?.getTime()||0;
+      const bd=parseDate(b.first_seen)?.getTime()||0;
+      return bd-ad || (b.score||0)-(a.score||0);
+   });
  if(!visible.length){
    box.innerHTML='<div class="empty"><b>No hay ofertas reales todavía</b>No hay ofertas compatibles para mostrar en este momento.</div>';
    return;
  }
  visible.forEach((j,idx)=>{
   const manual=j.decision==='manual_review', cls=manual?'manual':'auto';
-  const action=manual?'Revisar ahora':'Preparar postulación';
   const url=j.external_url||j.url||'';
   const reasons=[...(j.reasons||[]),...(j.warnings||[]).map(x=>'⚠ '+x)].slice(0,4).join(' · ');
+  const when=jobWhen(j);
+  const source=j.source||'Fuente laboral';
   const link=url
-    ? `<a class="primary" href="${esc(url)}" target="_blank" rel="noopener" data-job="${idx}">${action}</a>`
+    ? `<a class="primary" href="${esc(url)}" target="_blank" rel="noopener" data-job="${idx}">Ver oferta / Postular</a>`
     : `<span class="primary disabled-link">Sin enlace disponible</span>`;
-  box.insertAdjacentHTML('beforeend',`<article class="card ${cls}"><div class="head"><div class="score">${j.score??0}%</div><div><div class="title">${esc(j.title)}</div><div class="meta">${esc(j.company||j.source||'')} · ${esc(j.location||'')} ${j.age_hours!=null?'· hace '+esc(j.age_hours)+' h':''}</div></div></div><div class="reason">${esc(reasons||j.description||'Sin detalle adicional.')}</div><div class="actions">${link}<button class="secondary" data-detail="${idx}">Ver detalle</button></div></article>`);
+  box.insertAdjacentHTML('beforeend',
+    `<article class="card ${cls}">
+      <div class="head">
+        <div class="score">${j.score??0}%</div>
+        <div>
+          <div class="title">${esc(j.title)}</div>
+          <div class="meta"><span class="sourcebadge">${esc(source)}</span>${esc(j.company||'')} ${j.location?'· '+esc(j.location):''}</div>
+          ${when?`<div class="when">🕒 ${esc(when)}</div>`:''}
+        </div>
+      </div>
+      <div class="reason">${esc(reasons||j.description||'Sin detalle adicional.')}</div>
+      <div class="actions">${link}<button class="secondary" data-detail="${idx}">Ver detalle</button></div>
+    </article>`);
  });
  box.querySelectorAll('[data-job]').forEach(a=>a.addEventListener('click',()=>addHistory(visible[Number(a.dataset.job)])));
- box.querySelectorAll('[data-detail]').forEach(b=>b.addEventListener('click',()=>alert((visible[Number(b.dataset.detail)].description||'Sin detalle').slice(0,1200))));
+ box.querySelectorAll('[data-detail]').forEach(b=>b.addEventListener('click',()=>alert((visible[Number(b.dataset.detail)].description||visible[Number(b.dataset.detail)].text||'Sin detalle').slice(0,1200))));
 }
 function filterJobs(x){render(x)}
 
@@ -177,7 +242,8 @@ async function loadLiveJobs(){
       first_seen:x.first_seen
    }));
    jobs.splice(0,jobs.length,...normalized);
-   st.textContent='Supabase: conectado. '+rows.length+' ofertas disponibles.';
+   const newest=rows.map(x=>parseDate(x.first_seen)).filter(Boolean).sort((a,b)=>b-a)[0];
+   st.textContent='Supabase: conectado. '+rows.length+' ofertas disponibles.'+(newest?' Última detección: '+newest.toLocaleTimeString('es-UY',{hour:'2-digit',minute:'2-digit'}):'');
    render();
  }catch(e){
    st.textContent='Supabase: error de conexión ('+e.message+').';
@@ -220,7 +286,7 @@ async function loadAlerts(){
      const score=o.score??p.score??'';
      const url=o.external_url||p.external_url||p.url||'';
      const tag=a.type==='apply_now'?'Postular':'Revisar';
-     return `<article class="card ${a.type==='apply_now'?'auto':'manual'}"><div class="head"><div class="score">${score!==''?esc(score)+'%':'!'}</div><div><div class="title">${esc(title)}</div><div class="meta">${esc(company)} · ${esc(tag)}</div></div></div><div class="reason">${esc(a.message||'Alerta prioritaria')}</div>${url?`<div class="actions"><a class="primary" href="${esc(url)}" target="_blank" rel="noopener">Abrir oferta</a><button class="secondary" onclick="addHistory({title:${JSON.stringify(title)},company:${JSON.stringify(company)},url:${JSON.stringify(url)}})">Guardar</button></div>`:''}</article>`;
+     return `<article class="card ${a.type==='apply_now'?'auto':'manual'}"><div class="head"><div class="score">${score!==''?esc(score)+'%':'!'}</div><div><div class="title">${esc(title)}</div><div class="meta">${esc(company)} · ${esc(tag)}</div></div></div><div class="reason">${esc(a.message||'Alerta prioritaria')}</div>${url?`<div class="actions"><a class="primary" href="${esc(url)}" target="_blank" rel="noopener">Ver oferta / Postular</a><button class="secondary" onclick="addHistory({title:${JSON.stringify(title)},company:${JSON.stringify(company)},url:${JSON.stringify(url)}})">Guardar</button></div>`:''}</article>`;
    }).join('');
  }catch(e){
    el.innerHTML='<div class="empty"><b>Error al cargar alertas</b>'+esc(e.message)+'</div>';
