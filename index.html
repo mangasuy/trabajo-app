@@ -1,0 +1,233 @@
+<!doctype html><html lang="es"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#52697b"><link rel="manifest" href="manifest.webmanifest">
+<title>Trabajo</title>
+<style>
+:root{--bg:#f4f6f8;--card:#fff;--txt:#20272d;--muted:#77818a;--line:#e5e9ec;--accent:#52697b;--ok:#587461;--okbg:#edf4ef;--warn:#8b6d39;--warnbg:#f7f1e6}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--txt);font-family:system-ui,-apple-system,Segoe UI,sans-serif}
+main{max-width:650px;margin:auto;padding:18px 14px 94px}header{display:flex;justify-content:space-between;align-items:center;margin:5px 2px 18px}
+h1{margin:0;font-size:25px}.sub{font-size:12px;color:var(--muted);margin-top:3px}.live{background:var(--okbg);color:var(--ok);border-radius:999px;padding:8px 11px;font-size:12px;font-weight:750}
+.setup{background:#fff;border:1px solid var(--line);border-radius:20px;padding:16px;margin:0 0 15px}
+.setup h2{font-size:15px;margin:0 0 5px}.setup p{font-size:12px;color:var(--muted);line-height:1.45;margin:0 0 12px}
+.setup-actions{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+button,a{border:0;border-radius:13px;padding:12px;text-align:center;text-decoration:none;font-weight:750;font-size:12px}
+.primary{background:var(--accent);color:#fff}.secondary{background:#eef1f3;color:#4c5861}
+.alert{background:#fff;border:1px solid var(--line);border-radius:18px;padding:14px;margin-bottom:14px;display:flex;gap:12px;align-items:center}
+.alert b{font-size:13px}.alert p{font-size:11px;color:var(--muted);margin:3px 0 0}
+.tabs{display:flex;gap:8px;overflow:auto;margin:15px 0}.tab{border:1px solid var(--line);background:#fff;border-radius:999px;padding:9px 13px;white-space:nowrap;font-size:12px;color:#4d5962}
+.card{background:#fff;border:1px solid var(--line);border-radius:20px;padding:16px;margin:11px 0;box-shadow:0 4px 18px rgba(25,35,45,.035)}
+.head{display:flex;gap:12px}.score{width:58px;height:58px;flex:0 0 58px;border-radius:16px;display:grid;place-items:center;font-size:18px;font-weight:850}
+.auto .score{background:var(--okbg);color:var(--ok)}.manual .score{background:var(--warnbg);color:var(--warn)}
+.title{font-weight:780;line-height:1.25;font-size:15px;margin:2px 0 5px}.meta{font-size:11px;color:var(--muted)}.reason{font-size:12px;color:#59636b;line-height:1.45;margin:12px 0}
+.actions{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}
+nav{position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px solid var(--line);padding:11px 8px max(14px,env(safe-area-inset-bottom));display:flex;justify-content:space-around;font-size:11px;color:#68737c}
+.statusline{font-size:11px;color:var(--muted);margin-top:8px}
+.view{display:none}.view.active{display:block}
+.navbtn{background:transparent;color:#68737c;padding:4px 8px;border-radius:10px;font-weight:650}
+.navbtn.active{color:var(--accent);background:#eef1f3}
+.empty{background:#fff;border:1px solid var(--line);border-radius:20px;padding:22px 18px;text-align:center;color:var(--muted);margin-top:12px}
+.empty b{display:block;color:var(--txt);font-size:15px;margin-bottom:5px}
+.settings-card{background:#fff;border:1px solid var(--line);border-radius:20px;padding:17px;margin:11px 0}
+.settings-card h3{margin:0 0 8px;font-size:14px}.settings-card p{margin:5px 0;color:var(--muted);font-size:12px;line-height:1.45}
+.badge{display:inline-block;border-radius:999px;padding:6px 9px;background:var(--okbg);color:var(--ok);font-size:11px;font-weight:750}
+.disabled-link{opacity:.5;pointer-events:none}
+</style><script src="config.js"></script></head><body><main>
+<header><div><h1>Trabajo</h1><div class="sub">Buscador inteligente</div></div><span class="live">● cada 1 h</span></header>
+
+
+<section id="homeView" class="view active">
+<section class="setup">
+<h2>Activar en este teléfono</h2>
+<p>Podés instalar la app. La búsqueda automática ya está activa y se ejecuta cada hora.</p>
+<div class="setup-actions"><button class="primary" id="notifyBtn">Activar alertas</button><button class="secondary" id="installBtn">Instalar app</button></div>
+<div class="statusline" id="setupStatus">Búsqueda automática activa cada hora.</div>
+</section>
+
+<div class="alert"><div style="font-size:22px">🔔</div><div><b>Alertas prioritarias</b><p>75%+ para postular · 50–74% para revisar · menos de 50% silencioso.</p></div></div>
+<div class="tabs"><button class="tab" onclick="filterJobs('all')">Todas</button><button class="tab" onclick="filterJobs('auto_apply')">Para postular</button><button class="tab" onclick="filterJobs('manual_review')">Revisar</button></div>
+<section id="jobs"></section>
+</section>
+
+<section id="alertsView" class="view">
+  <div class="settings-card">
+    <h3>🔔 Alertas</h3>
+    <p>Acá aparecerán las oportunidades nuevas que requieran tu atención cuando la búsqueda automática esté activa.</p>
+    <div id="alertsList" class="empty"><b>Sin alertas todavía</b>Las alertas reales llegarán desde Supabase.</div>
+  </div>
+</section>
+
+<section id="historyView" class="view">
+  <div class="settings-card">
+    <h3>✓ Historial</h3>
+    <p>Registro local de ofertas que abriste desde este teléfono.</p>
+    <div id="historyList"></div>
+  </div>
+</section>
+
+<section id="settingsView" class="view">
+  <div class="settings-card">
+    <h3>⚙ Ajustes</h3>
+    <p><span class="badge">Supabase conectado</span></p>
+    <p><b>Frecuencia prevista:</b> cada 1 hora.</p>
+    <p><b>Postular:</b> 75–100%.</p>
+    <p><b>Revisar manualmente:</b> 50–74%.</p>
+    <p><b>Descartar:</b> menos de 50%.</p>
+    <p><b>Zona:</b> Montevideo, más remotos internacionales compatibles.</p>
+    <p><b>Turno:</b> diurno; sin trabajo nocturno.</p>
+    <p id="connectionStatus">Comprobando conexión con Supabase…</p>
+  </div>
+</section>
+</main>
+<nav>
+<button class="navbtn active" data-view="homeView">⌂ Inicio</button>
+<button class="navbtn" data-view="alertsView">🔔 Alertas</button>
+<button class="navbtn" data-view="historyView">✓ Historial</button>
+<button class="navbtn" data-view="settingsView">⚙ Ajustes</button>
+</nav>
+<script>
+const jobs=[];
+let currentFilter='all';
+let deferredPrompt=null;
+
+window.addEventListener('beforeinstallprompt', e=>{e.preventDefault();deferredPrompt=e;});
+document.getElementById('installBtn').onclick=async()=>{
+ const st=document.getElementById('setupStatus');
+ if(deferredPrompt){deferredPrompt.prompt();await deferredPrompt.userChoice;deferredPrompt=null;}
+ else st.textContent='En Chrome: menú ⋮ → Agregar a pantalla principal / Instalar app.';
+};
+if('serviceWorker' in navigator) navigator.serviceWorker.register('./service-worker.js');
+
+document.getElementById('notifyBtn').onclick=()=>{
+ document.getElementById('setupStatus').textContent='La búsqueda automática está activa. Las alertas importantes aparecen en la pestaña Alertas.';
+};
+
+function esc(s){return String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
+const box=document.getElementById('jobs');
+
+function addHistory(j){
+ const item={title:j.title||'Oferta', company:j.company||'', url:j.url||j.external_url||'', at:new Date().toISOString()};
+ const h=JSON.parse(localStorage.getItem('trabajo_history')||'[]');
+ const next=[item,...h.filter(x=>x.url!==item.url || x.title!==item.title)].slice(0,50);
+ localStorage.setItem('trabajo_history',JSON.stringify(next));
+ renderHistory();
+}
+function renderHistory(){
+ const el=document.getElementById('historyList');
+ const h=JSON.parse(localStorage.getItem('trabajo_history')||'[]');
+ if(!h.length){el.innerHTML='<div class="empty"><b>Sin historial todavía</b>Las ofertas que abras aparecerán acá.</div>';return;}
+ el.innerHTML=h.map(x=>`<div class="card"><div class="title">${esc(x.title)}</div><div class="meta">${esc(x.company||'')} · ${new Date(x.at).toLocaleString()}</div>${x.url?`<div class="actions"><a class="primary" href="${esc(x.url)}" target="_blank" rel="noopener">Abrir de nuevo</a></div>`:''}</div>`).join('');
+}
+
+function render(filter=currentFilter){
+ currentFilter=filter;
+ box.innerHTML='';
+ const visible=jobs.filter(j=>filter==='all'?j.decision!=='discard':j.decision===filter).sort((a,b)=>(b.score||0)-(a.score||0));
+ if(!visible.length){
+   box.innerHTML='<div class="empty"><b>No hay ofertas reales todavía</b>No hay ofertas compatibles para mostrar en este momento.</div>';
+   return;
+ }
+ visible.forEach((j,idx)=>{
+  const manual=j.decision==='manual_review', cls=manual?'manual':'auto';
+  const action=manual?'Revisar ahora':'Preparar postulación';
+  const url=j.external_url||j.url||'';
+  const reasons=[...(j.reasons||[]),...(j.warnings||[]).map(x=>'⚠ '+x)].slice(0,4).join(' · ');
+  const link=url
+    ? `<a class="primary" href="${esc(url)}" target="_blank" rel="noopener" data-job="${idx}">${action}</a>`
+    : `<span class="primary disabled-link">Sin enlace disponible</span>`;
+  box.insertAdjacentHTML('beforeend',`<article class="card ${cls}"><div class="head"><div class="score">${j.score??0}%</div><div><div class="title">${esc(j.title)}</div><div class="meta">${esc(j.company||j.source||'')} · ${esc(j.location||'')} ${j.age_hours!=null?'· hace '+esc(j.age_hours)+' h':''}</div></div></div><div class="reason">${esc(reasons||j.description||'Sin detalle adicional.')}</div><div class="actions">${link}<button class="secondary" data-detail="${idx}">Ver detalle</button></div></article>`);
+ });
+ box.querySelectorAll('[data-job]').forEach(a=>a.addEventListener('click',()=>addHistory(visible[Number(a.dataset.job)])));
+ box.querySelectorAll('[data-detail]').forEach(b=>b.addEventListener('click',()=>alert((visible[Number(b.dataset.detail)].description||'Sin detalle').slice(0,1200))));
+}
+function filterJobs(x){render(x)}
+
+document.querySelectorAll('.navbtn').forEach(btn=>{
+ btn.addEventListener('click',()=>{
+   document.querySelectorAll('.navbtn').forEach(x=>x.classList.remove('active'));
+   document.querySelectorAll('.view').forEach(x=>x.classList.remove('active'));
+   btn.classList.add('active');
+   document.getElementById(btn.dataset.view).classList.add('active');
+   if(btn.dataset.view==='historyView') renderHistory();
+ });
+});
+
+async function loadLiveJobs(){
+ const c=window.TRABAJO_CONFIG||{};
+ const st=document.getElementById('connectionStatus');
+ if(!c.SUPABASE_URL||!c.SUPABASE_ANON_KEY){
+   st.textContent='Supabase: falta configuración.';
+   render();
+   return;
+ }
+ try{
+   const r=await fetch(c.SUPABASE_URL.replace(/\/$/,'')+'/rest/v1/offers?select=id,title,company,location,score,decision,external_url,first_seen,payload&decision=in.(auto_apply,manual_review)&order=first_seen.desc&limit=100',{
+     headers:{apikey:c.SUPABASE_ANON_KEY,Authorization:'Bearer '+c.SUPABASE_ANON_KEY}
+   });
+   if(!r.ok) throw new Error('HTTP '+r.status);
+   const rows=await r.json();
+   const normalized=rows.map(x=>({
+      ...(x.payload||{}),
+      id:x.id,
+      title:x.title || x.payload?.title,
+      company:x.company || x.payload?.company,
+      location:x.location || x.payload?.location,
+      score:x.score ?? x.payload?.score,
+      decision:x.decision || x.payload?.decision,
+      external_url:x.external_url || x.payload?.external_url || x.payload?.url,
+      first_seen:x.first_seen
+   }));
+   jobs.splice(0,jobs.length,...normalized);
+   st.textContent='Supabase: conectado. '+rows.length+' ofertas disponibles.';
+   render();
+ }catch(e){
+   st.textContent='Supabase: error de conexión ('+e.message+').';
+   render();
+ }
+}
+async function loadAlerts(){
+ const c=window.TRABAJO_CONFIG||{};
+ const el=document.getElementById('alertsList');
+ if(!c.SUPABASE_URL||!c.SUPABASE_ANON_KEY){
+   el.innerHTML='<div class="empty"><b>Sin conexión</b>Falta la configuración de Supabase.</div>';
+   return;
+ }
+ try{
+   const base=c.SUPABASE_URL.replace(/\/$/,'');
+   const headers={apikey:c.SUPABASE_ANON_KEY,Authorization:'Bearer '+c.SUPABASE_ANON_KEY};
+   const r=await fetch(base+'/rest/v1/alerts?select=id,offer_id,type,message,created_at&order=created_at.desc&limit=50',{headers});
+   if(!r.ok) throw new Error('HTTP '+r.status);
+   const alerts=await r.json();
+   if(!alerts.length){
+     el.innerHTML='<div class="empty"><b>Sin alertas nuevas</b>No hay oportunidades prioritarias pendientes.</div>';
+     return;
+   }
+   const ids=[...new Set(alerts.map(a=>a.offer_id).filter(Boolean))];
+   let offerMap={};
+   if(ids.length){
+     const q=ids.map(id=>'"'+String(id).replace(/"/g,'')+'"').join(',');
+     const ro=await fetch(base+'/rest/v1/offers?select=id,title,company,location,score,decision,external_url,payload&id=in.('+encodeURIComponent(q)+')',{headers});
+     if(ro.ok){
+       const offers=await ro.json();
+       offerMap=Object.fromEntries(offers.map(o=>[o.id,o]));
+     }
+   }
+   el.className='';
+   el.innerHTML=alerts.map(a=>{
+     const o=offerMap[a.offer_id]||{};
+     const p=o.payload||{};
+     const title=o.title||p.title||'Oferta';
+     const company=o.company||p.company||o.location||'';
+     const score=o.score??p.score??'';
+     const url=o.external_url||p.external_url||p.url||'';
+     const tag=a.type==='apply_now'?'Postular':'Revisar';
+     return `<article class="card ${a.type==='apply_now'?'auto':'manual'}"><div class="head"><div class="score">${score!==''?esc(score)+'%':'!'}</div><div><div class="title">${esc(title)}</div><div class="meta">${esc(company)} · ${esc(tag)}</div></div></div><div class="reason">${esc(a.message||'Alerta prioritaria')}</div>${url?`<div class="actions"><a class="primary" href="${esc(url)}" target="_blank" rel="noopener">Abrir oferta</a><button class="secondary" onclick="addHistory({title:${JSON.stringify(title)},company:${JSON.stringify(company)},url:${JSON.stringify(url)}})">Guardar</button></div>`:''}</article>`;
+   }).join('');
+ }catch(e){
+   el.innerHTML='<div class="empty"><b>Error al cargar alertas</b>'+esc(e.message)+'</div>';
+ }
+}
+
+renderHistory();
+loadLiveJobs();
+loadAlerts();
+</script></body></html>
