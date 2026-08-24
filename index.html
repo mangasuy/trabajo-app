@@ -3,7 +3,7 @@
 <meta name="theme-color" content="#52697b"><link rel="manifest" href="manifest.webmanifest">
 <title>Trabajo</title>
 <style>
-:root{--bg:#f4f6f8;--card:#fff;--txt:#20272d;--muted:#77818a;--line:#e5e9ec;--accent:#52697b;--ok:#587461;--okbg:#edf4ef;--warn:#8b6d39;--warnbg:#f7f1e6}
+:root{--bg:#f4f6f8;--card:#fff;--txt:#20272d;--muted:#77818a;--line:#e5e9ec;--accent:#52697b;--ok:#3f7d55;--okbg:#edf7f0;--warn:#9a741e;--warnbg:#fff8df;--bad:#9b4141;--badbg:#fff0f0}
 *{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--txt);font-family:system-ui,-apple-system,Segoe UI,sans-serif}
 main{max-width:650px;margin:auto;padding:18px 14px 94px}header{display:flex;justify-content:space-between;align-items:center;margin:5px 2px 18px}
 h1{margin:0;font-size:25px}.sub{font-size:12px;color:var(--muted);margin-top:3px}.live{background:var(--okbg);color:var(--ok);border-radius:999px;padding:8px 11px;font-size:12px;font-weight:750}
@@ -15,7 +15,7 @@ button,a{border:0;border-radius:13px;padding:12px;text-align:center;text-decorat
 .alert{background:#fff;border:1px solid var(--line);border-radius:18px;padding:14px;margin-bottom:14px;display:flex;gap:12px;align-items:center}
 .alert b{font-size:13px}.alert p{font-size:11px;color:var(--muted);margin:3px 0 0}
 .tabs{display:flex;gap:8px;overflow:auto;margin:15px 0}.tab{border:1px solid var(--line);background:#fff;border-radius:999px;padding:9px 13px;white-space:nowrap;font-size:12px;color:#4d5962}
-.card{background:#fff;border:1px solid var(--line);border-radius:20px;padding:16px;margin:11px 0;box-shadow:0 4px 18px rgba(25,35,45,.035)}
+.card{background:#fff;border:1px solid var(--line);border-radius:20px;padding:16px;margin:11px 0;box-shadow:0 4px 18px rgba(25,35,45,.035)}.card.good{border-left:6px solid var(--ok);background:var(--okbg)}.card.maybe{border-left:6px solid var(--warn);background:var(--warnbg)}.card.bad{border-left:6px solid var(--bad);background:var(--badbg)}.fitlabel{display:inline-block;border-radius:999px;padding:4px 8px;font-size:10px;font-weight:800;margin-top:6px}.fitlabel.good{background:#d9efdf;color:#285d39}.fitlabel.maybe{background:#ffedb0;color:#75570d}.fitlabel.bad{background:#ffd7d7;color:#7c2929}
 .head{display:flex;gap:12px}.score{width:58px;height:58px;flex:0 0 58px;border-radius:16px;display:grid;place-items:center;font-size:18px;font-weight:850}
 .auto .score{background:var(--okbg);color:var(--ok)}.manual .score{background:var(--warnbg);color:var(--warn)}
 .title{font-weight:780;line-height:1.25;font-size:15px;margin:2px 0 5px}.meta{font-size:11px;color:var(--muted)}.reason{font-size:12px;color:#59636b;line-height:1.45;margin:12px 0}
@@ -44,7 +44,7 @@ nav{position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px solid 
 </section>
 
 <div class="alert"><div style="font-size:22px">🔔</div><div><b>Alertas prioritarias</b><p>75%+ para postular · 50–74% para revisar · menos de 50% silencioso.</p></div></div>
-<div class="tabs"><button class="tab" onclick="filterJobs('all')">Todas</button><button class="tab" onclick="filterJobs('auto_apply')">Para postular</button><button class="tab" onclick="filterJobs('manual_review')">Revisar</button></div>
+<div class="tabs"><button class="tab" onclick="filterJobs('all')">Todas</button><button class="tab" onclick="filterJobs('auto_apply')">🟢 Postular</button><button class="tab" onclick="filterJobs('manual_review')">🟡 Revisar</button><button class="tab" onclick="filterJobs('discard')">🔴 Descartar</button></div>
 <section id="jobs"></section>
 </section>
 
@@ -140,6 +140,16 @@ function jobWhen(j){
   }
   return relativeTime(j.first_seen||j.created_at||j.detected_at);
 }
+
+function allowedLocation(j){
+  if(j.remote || j.payload?.remote) return true;
+  const loc=String(j.location||j.payload?.location||'').trim().toLowerCase();
+  if(!loc) return true;
+  if(loc.includes('montevideo')) return true;
+  const other=['artigas','canelones','cerro largo','colonia','durazno','flores','florida','lavalleja','maldonado','paysandú','paysandu','río negro','rio negro','rivera','rocha','salto','san josé','san jose','soriano','tacuarembó','tacuarembo','treinta y tres'];
+  return !other.some(x=>loc.includes(x));
+}
+
 function isJunkTitle(title){
   const t=String(title||'').trim().toLowerCase();
   if(!t) return true;
@@ -168,41 +178,49 @@ function render(filter=currentFilter){
  box.innerHTML='';
  const visible=jobs
    .filter(j=>!isJunkTitle(j.title))
-   .filter(j=>filter==='all'?j.decision!=='discard':j.decision===filter)
+   .filter(j=>allowedLocation(j))
+   .filter(j=>filter==='all'?true:j.decision===filter)
    .sort((a,b)=>{
       const ad=parseDate(a.first_seen)?.getTime()||0;
       const bd=parseDate(b.first_seen)?.getTime()||0;
       return bd-ad || (b.score||0)-(a.score||0);
    });
+
  if(!visible.length){
-   box.innerHTML='<div class="empty"><b>No hay ofertas reales todavía</b>No hay ofertas compatibles para mostrar en este momento.</div>';
+   box.innerHTML='<div class="empty"><b>No hay ofertas en este filtro</b>No hay resultados compatibles para mostrar ahora.</div>';
    return;
  }
+
  visible.forEach((j,idx)=>{
-  const manual=j.decision==='manual_review', cls=manual?'manual':'auto';
+  const score=Number(j.score||0);
+  const fit=score>=75?'good':score>=50?'maybe':'bad';
+  const fitText=score>=75?'APTA · POSTULAR':score>=50?'REVISAR':'NO RECOMENDADA';
   const url=j.external_url||j.url||'';
   const reasons=[...(j.reasons||[]),...(j.warnings||[]).map(x=>'⚠ '+x)].slice(0,4).join(' · ');
   const when=jobWhen(j);
-  const source=j.source||'Fuente laboral';
+  const source=j.source||j.payload?.source||'Fuente laboral';
   const link=url
     ? `<a class="primary" href="${esc(url)}" target="_blank" rel="noopener" data-job="${idx}">Ver oferta / Postular</a>`
     : `<span class="primary disabled-link">Sin enlace disponible</span>`;
+
   box.insertAdjacentHTML('beforeend',
-    `<article class="card ${cls}">
+    `<article class="card ${fit}">
       <div class="head">
-        <div class="score">${j.score??0}%</div>
+        <div class="score">${score}%</div>
         <div>
           <div class="title">${esc(j.title)}</div>
           <div class="meta"><span class="sourcebadge">${esc(source)}</span>${esc(j.company||'')} ${j.location?'· '+esc(j.location):''}</div>
           ${when?`<div class="when">🕒 ${esc(when)}</div>`:''}
+          <span class="fitlabel ${fit}">${fitText}</span>
         </div>
       </div>
-      <div class="reason">${esc(reasons||j.description||'Sin detalle adicional.')}</div>
+      <div class="reason">${esc(reasons||j.description||j.payload?.text||'Sin detalle adicional.')}</div>
       <div class="actions">${link}<button class="secondary" data-detail="${idx}">Ver detalle</button></div>
     </article>`);
  });
+
  box.querySelectorAll('[data-job]').forEach(a=>a.addEventListener('click',()=>addHistory(visible[Number(a.dataset.job)])));
- box.querySelectorAll('[data-detail]').forEach(b=>b.addEventListener('click',()=>alert((visible[Number(b.dataset.detail)].description||visible[Number(b.dataset.detail)].text||'Sin detalle').slice(0,1200))));
+ box.querySelectorAll('[data-detail]').forEach(b=>b.addEventListener('click',()=>alert((visible[Number(b.dataset.detail)].description||visible[Number(b.dataset.detail)].payload?.text||'Sin detalle').slice(0,1200))));
 }
 function filterJobs(x){render(x)}
 
@@ -225,7 +243,7 @@ async function loadLiveJobs(){
    return;
  }
  try{
-   const r=await fetch(c.SUPABASE_URL.replace(/\/$/,'')+'/rest/v1/offers?select=id,title,company,location,score,decision,external_url,first_seen,payload&decision=in.(auto_apply,manual_review)&order=first_seen.desc&limit=100',{
+   const r=await fetch(c.SUPABASE_URL.replace(/\/$/,'')+'/rest/v1/offers?select=id,title,company,location,score,decision,external_url,first_seen,payload&order=first_seen.desc&limit=100',{
      headers:{apikey:c.SUPABASE_ANON_KEY,Authorization:'Bearer '+c.SUPABASE_ANON_KEY}
    });
    if(!r.ok) throw new Error('HTTP '+r.status);
