@@ -67,7 +67,7 @@ def save(o):
 
 def main():
     run("buscojobs_connector.py")
-    run("indeed_connector.py")
+    run("gallito_connector.py")
     run("buscojobs_full_parser.py")
     run("scoring_engine_v2.py")
     candidates = [DATA/"scored_results.json", DATA/"validation_results.json"]
