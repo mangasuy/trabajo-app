@@ -1,5 +1,8 @@
 from __future__ import annotations
-import json, re, time
+
+import json
+import re
+import time
 from pathlib import Path
 from urllib.request import Request, urlopen
 from html.parser import HTMLParser
@@ -7,6 +10,13 @@ from html.parser import HTMLParser
 ROOT = Path(__file__).resolve().parent
 DATA = ROOT / "data"
 DATA.mkdir(exist_ok=True)
+
+OTHER_DEPARTMENTS = (
+    "artigas","canelones","cerro largo","colonia","durazno","flores","florida",
+    "lavalleja","maldonado","paysandú","paysandu","río negro","rio negro",
+    "rivera","rocha","salto","san josé","san jose","soriano",
+    "tacuarembó","tacuarembo","treinta y tres"
+)
 
 class TextParser(HTMLParser):
     def __init__(self):
@@ -19,7 +29,8 @@ class TextParser(HTMLParser):
 
 def fetch(url):
     req = Request(url, headers={
-        "User-Agent": "Mozilla/5.0 (Linux; Android 13) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126 Safari/537.36 TrabajoApp/1.0",
+        "User-Agent": "Mozilla/5.0 (Linux; Android 13) AppleWebKit/537.36 "
+                      "(KHTML, like Gecko) Chrome/126 Safari/537.36 TrabajoApp/1.0",
         "Accept-Language": "es-UY,es;q=0.9,en;q=0.7",
     })
     with urlopen(req, timeout=25) as r:
@@ -35,39 +46,48 @@ def valid_job_title(title):
         return False
     t = " ".join(title.split()).strip()
     low = t.lower()
-    exact_bad = {"ver más ofertas","ver mas ofertas","ofertas por localización","ofertas por localizacion",
-                 "ofertas por función laboral","ofertas por funcion laboral","cpa empleo"}
+    exact_bad = {
+        "ver más ofertas","ver mas ofertas","ofertas por localización","ofertas por localizacion",
+        "ofertas por función laboral","ofertas por funcion laboral","cpa empleo"
+    }
     if low in exact_bad:
         return False
-    bad_phrases = ("ofertas de empleo esperan tu cv","ofertas por localización","ofertas por localizacion",
-                   "ofertas por función laboral","ofertas por funcion laboral","ver más ofertas","ver mas ofertas")
-    if any(x in low for x in bad_phrases):
+    if any(x in low for x in ("ofertas de empleo esperan tu cv","ofertas por localización",
+                              "ofertas por localizacion","ofertas por función laboral",
+                              "ofertas por funcion laboral","ver más ofertas","ver mas ofertas")):
         return False
-    categories = ("administración","administracion","ventas","oficios","gestión","gestion","distribución","distribucion",
-                  "tecnología de la información","tecnologia de la informacion","atención al cliente","atencion al cliente",
-                  "contabilidad/auditorías","contabilidad/auditorias","producción","produccion","manufactura",
-                  "atención médica","atencion medica","marketing","construcción","construccion","otro")
-    for category in categories:
-        if re.fullmatch(rf"{re.escape(category)}\s+\d+", low, flags=re.I):
-            return False
-    return not bool(re.fullmatch(r"[\d\s.,]+", t))
+    if re.fullmatch(r"[\d\s.,]+", t):
+        return False
+    return True
+
+def location_allowed(item):
+    if item.get("remote"):
+        return True
+    loc = str(item.get("location") or "").strip().lower()
+    if not loc:
+        return True
+    if "montevideo" in loc:
+        return True
+    return not any(dep in loc for dep in OTHER_DEPARTMENTS)
 
 def extract(text, item):
     low = text.lower()
+
     def grab(pattern):
         m = re.search(pattern, text, re.I)
         return m.group(1).strip() if m else None
-    loc = item.get("location") or ("Montevideo" if "montevideo" in low else None)
-    remote = bool(item.get("remote")) or any(x in low for x in ("teletrabajo","trabajo remoto","modalidad remota","100% remoto"))
+
+    loc = item.get("location")
+    if not loc and "montevideo" in low:
+        loc = "Montevideo"
+
+    remote = bool(item.get("remote")) or any(
+        x in low for x in ("teletrabajo","trabajo remoto","modalidad remota","100% remoto","home office")
+    )
+
     schedule = grab(r"Horario\s*[:\-]?\s*(.{3,120}?)(?:Puestos Vacantes|Requisitos|$)")
     education = grab(r"Estudio Mínimo Necesario\s*[:\-]?\s*(.{3,80}?)(?:Áreas de estudio|Conocimientos|Idiomas|$)")
-    salary = None
-    sm = re.search(r"\$\s*([0-9][0-9\.\,]{3,})", text)
-    if sm:
-        try:
-            salary = int(re.sub(r"\D", "", sm.group(1)))
-        except Exception:
-            pass
+
     return {
         "title": item.get("title",""),
         "company": item.get("company"),
@@ -77,35 +97,65 @@ def extract(text, item):
         "remote": remote,
         "schedule": schedule,
         "education": education,
-        "salary": salary,
+        "salary": item.get("salary"),
         "age_hours": item.get("age_hours"),
         "published_at": item.get("published_at"),
         "text": text,
     }
 
+def load_json(path):
+    if not path.exists():
+        return []
+    try:
+        return json.loads(path.read_text(encoding="utf-8"))
+    except Exception:
+        return []
+
 def main():
-    inp = DATA / "buscojobs_latest.json"
-    jobs = json.loads(inp.read_text(encoding="utf-8")) if inp.exists() else []
+    jobs = []
+    jobs.extend(load_json(DATA / "buscojobs_latest.json"))
+    jobs.extend(load_json(DATA / "gallito_latest.json"))
+
     full = []
-    for j in jobs[:80]:
+    seen = set()
+
+    for j in jobs[:120]:
         title = str(j.get("title","")).strip()
         url = str(j.get("url","")).strip()
-        if not valid_job_title(title):
-            print("Descartado:", title)
+
+        if not valid_job_title(title) or not url:
             continue
-        if not url:
+
+        if not location_allowed(j):
+            print("Descartado por departamento:", title, "|", j.get("location"))
             continue
+
+        key = (str(j.get("source","")), url)
+        if key in seen:
+            continue
+        seen.add(key)
+
         try:
-            txt = plain(fetch(url))
-            if len(txt) < 180:
+            txt = str(j.get("text") or "").strip()
+            if not txt:
+                txt = plain(fetch(url))
+                time.sleep(0.18)
+
+            if len(txt) < 150:
                 continue
-            full.append(extract(txt, j))
-            time.sleep(0.20)
+
+            item = extract(txt, j)
+            if not location_allowed(item):
+                print("Descartado por departamento:", title, "|", item.get("location"))
+                continue
+
+            full.append(item)
         except Exception as e:
             print("parse error:", j.get("source",""), title, str(e))
+
     out = DATA / "buscojobs_full.json"
     out.write_text(json.dumps(full, ensure_ascii=False, indent=2), encoding="utf-8")
-    print(f"{len(full)} fichas completas guardadas -> {out}")
+    print(f"{len(full)} fichas completas combinadas -> {out}")
 
 if __name__ == "__main__":
     main()
